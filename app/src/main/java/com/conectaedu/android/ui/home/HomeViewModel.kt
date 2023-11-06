@@ -5,12 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.conectaedu.android.data.model.data
 import com.conectaedu.android.domain.model.Area
 import com.conectaedu.android.domain.model.User
 import com.conectaedu.android.domain.usecase.areas.GetAllAreasUseCase
 import com.conectaedu.android.domain.usecase.user.GetCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,13 +28,16 @@ class HomeViewModel @Inject constructor(
 
     private fun getCurrentUser() {
         viewModelScope.launch {
-            getCurrentUserUseCase().collect { userResult ->
-                getAllAreasUseCase().collect { areasResult ->
-                    uiState = uiState.copy(
-                        currentUser = userResult.data(),
-                        allAreas = areasResult.data()
-                    )
-                }
+            val currentUserFlow = getCurrentUserUseCase()
+            val areasFlow = getAllAreasUseCase()
+
+            combine(currentUserFlow, areasFlow) { currentUser, areas ->
+                uiState.copy(
+                    currentUser = currentUser,
+                    allAreas = areas
+                )
+            }.collect {
+                uiState = it
             }
         }
     }

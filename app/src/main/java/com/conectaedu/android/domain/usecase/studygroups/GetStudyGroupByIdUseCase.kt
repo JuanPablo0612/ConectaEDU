@@ -4,6 +4,6 @@ import com.conectaedu.android.data.studygroups.StudyGroupsRepository
 import javax.inject.Inject
 
 class GetStudyGroupByIdUseCase @Inject constructor(private val studyGroupsRepository: StudyGroupsRepository) {
-    operator fun invoke(areaId: String, courseId: String, studyGroupId: String) =
-        studyGroupsRepository.getById(areaId, courseId, studyGroupId)
+    operator fun invoke(studyGroupId: String) =
+        studyGroupsRepository.getById(studyGroupId)
 }

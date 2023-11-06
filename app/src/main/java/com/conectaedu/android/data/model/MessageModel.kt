@@ -1,21 +1,24 @@
 package com.conectaedu.android.data.model
 
 import com.conectaedu.android.domain.model.Message
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 
 data class MessageModel(
     val id: String,
-    val timestamp: FieldValue = FieldValue.serverTimestamp(),
+    val timestamp: Timestamp,
     val senderId: String,
     val text: String,
-    val imageUrl: String
+    val imageUrl: String,
+    val studyGroupId: String
 ) {
     constructor() : this(
         id = "",
-        timestamp = FieldValue.serverTimestamp(),
+        timestamp = Timestamp.now(),
         senderId = "",
         text = "",
-        imageUrl = ""
+        imageUrl = "",
+        studyGroupId = ""
     )
 }
 
@@ -23,5 +26,6 @@ fun MessageModel.toDomain() = Message(
     id = id,
     senderId = senderId,
     text = text,
-    imageUrl = imageUrl
+    imageUrl = imageUrl,
+    studyGroupId = studyGroupId
 )

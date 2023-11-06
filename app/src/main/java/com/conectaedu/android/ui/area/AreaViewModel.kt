@@ -1,11 +1,11 @@
 package com.conectaedu.android.ui.area
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.conectaedu.android.data.model.data
 import com.conectaedu.android.domain.model.Area
 import com.conectaedu.android.domain.model.Course
 import com.conectaedu.android.domain.model.User
@@ -14,6 +14,8 @@ import com.conectaedu.android.domain.usecase.courses.AddCourseUseCase
 import com.conectaedu.android.domain.usecase.courses.GetAllCoursesByAreaIdUseCase
 import com.conectaedu.android.domain.usecase.user.GetCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,16 +47,20 @@ class AreaViewModel @Inject constructor(
 
     private fun getData() {
         viewModelScope.launch {
-            getCurrentUserUseCase().collect { userResult ->
-                getAreaByIdUseCase(uiState.areaId).collect { areaResult ->
-                    getAllCoursesByAreaIdUseCase(uiState.areaId).collect { coursesResult ->
-                        uiState = uiState.copy(
-                            currentUser = userResult.data(),
-                            area = areaResult.data(),
-                            courses = coursesResult.data()
-                        )
-                    }
-                }
+            val currentUserFlow = getCurrentUserUseCase()
+            val areaFlow = getAreaByIdUseCase(uiState.areaId)
+            val coursesFlow = getAllCoursesByAreaIdUseCase(uiState.areaId)
+
+            combine(currentUserFlow, areaFlow, coursesFlow) { currentUser, area, courses ->
+                uiState.copy(
+                    currentUser = currentUser,
+                    area = area,
+                    courses = courses
+                )
+            }.catch {
+                Log.e("AreaViewModel", "getData", it)
+            }.collect {
+                uiState = it
             }
         }
     }

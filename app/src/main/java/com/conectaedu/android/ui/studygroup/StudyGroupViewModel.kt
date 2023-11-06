@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.conectaedu.android.data.model.data
 import com.conectaedu.android.domain.model.Message
 import com.conectaedu.android.domain.model.StudyGroup
 import com.conectaedu.android.domain.model.User
@@ -14,6 +13,7 @@ import com.conectaedu.android.domain.usecase.messages.GetAllMessagesByStudyGroup
 import com.conectaedu.android.domain.usecase.studygroups.GetStudyGroupByIdUseCase
 import com.conectaedu.android.domain.usecase.user.GetCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,8 +39,6 @@ class StudyGroupViewModel @Inject constructor(
     fun onAddMessage() {
         viewModelScope.launch {
             addMessageUseCase(
-                uiState.areaId,
-                uiState.courseId,
                 uiState.studyGroupId,
                 uiState.currentUser.id,
                 uiState.message,
@@ -51,24 +49,22 @@ class StudyGroupViewModel @Inject constructor(
 
     private fun getData() {
         viewModelScope.launch {
-            getCurrentUserUseCase().collect { userResult ->
-                getStudyGroupByIdUseCase(
-                    uiState.areaId,
-                    uiState.courseId,
-                    uiState.studyGroupId
-                ).collect { studyGroupResult ->
-                    getAllMessagesByStudyGroupUseCase(
-                        uiState.areaId,
-                        uiState.courseId,
-                        uiState.studyGroupId
-                    ).collect { messagesResult ->
-                        uiState = uiState.copy(
-                            currentUser = userResult.data(),
-                            studyGroup = studyGroupResult.data(),
-                            messages = messagesResult.data()
-                        )
-                    }
-                }
+            val currentUserFlow = getCurrentUserUseCase()
+            val studyGroupFlow = getStudyGroupByIdUseCase(uiState.studyGroupId)
+            val messagesFlow = getAllMessagesByStudyGroupUseCase(uiState.studyGroupId)
+
+            combine(
+                currentUserFlow,
+                studyGroupFlow,
+                messagesFlow
+            ) { currentUser, studyGroup, messages ->
+                uiState.copy(
+                    currentUser = currentUser,
+                    studyGroup = studyGroup,
+                    messages = messages
+                )
+            }.collect {
+                uiState = it
             }
         }
     }

@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.conectaedu.android.data.model.data
 import com.conectaedu.android.domain.model.Course
 import com.conectaedu.android.domain.model.StudyGroup
 import com.conectaedu.android.domain.model.User
@@ -14,6 +13,7 @@ import com.conectaedu.android.domain.usecase.studygroups.AddStudyGroupUseCase
 import com.conectaedu.android.domain.usecase.studygroups.GetAllStudyGroupsByCourseUseCase
 import com.conectaedu.android.domain.usecase.user.GetCurrentUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,7 +34,7 @@ class CourseViewModel @Inject constructor(
 
     fun onAddStudyGroup(name: String, description: String) {
         viewModelScope.launch {
-            addStudyGroupUseCase(uiState.areaId, uiState.courseId, name, description)
+            addStudyGroupUseCase(name = name, description = description, courseId = uiState.courseId)
             onShowAddStudyGroupDialogChanged()
         }
     }
@@ -45,19 +45,22 @@ class CourseViewModel @Inject constructor(
 
     private fun getData() {
         viewModelScope.launch {
-            getCurrentUserUseCase().collect { userResult ->
-                getCourseByIdUseCase(uiState.areaId, uiState.courseId).collect { courseResult ->
-                    getAllStudyGroupsByCourseUseCase(
-                        uiState.areaId,
-                        uiState.courseId
-                    ).collect { studyGroupsResult ->
-                        uiState = uiState.copy(
-                            currentUser = userResult.data(),
-                            course = courseResult.data(),
-                            studyGroups = studyGroupsResult.data()
-                        )
-                    }
-                }
+            val currentUserFlow = getCurrentUserUseCase()
+            val courseFlow = getCourseByIdUseCase(uiState.courseId)
+            val studyGroupsFlow = getAllStudyGroupsByCourseUseCase(uiState.courseId)
+
+            combine(
+                currentUserFlow,
+                courseFlow,
+                studyGroupsFlow
+            ) { currentUser, course, studyGroups ->
+                uiState.copy(
+                    currentUser = currentUser,
+                    course = course,
+                    studyGroups = studyGroups
+                )
+            }.collect {
+                uiState = it
             }
         }
     }

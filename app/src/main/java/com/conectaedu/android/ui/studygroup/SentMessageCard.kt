@@ -17,7 +17,7 @@ import com.conectaedu.android.domain.model.Message
 @Composable
 fun SentMessageCard(message: Message) {
     Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-        Spacer(modifier = Modifier.fillMaxHeight(0.4f))
+        Spacer(modifier = Modifier.fillMaxWidth(0.1f))
 
         Card {
             Text(text = message.text, fontSize = 16.sp, modifier = Modifier.padding(20.dp))

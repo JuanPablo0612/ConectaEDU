@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.conectaedu.android.R
-import com.conectaedu.android.data.model.data
 import com.conectaedu.android.ui.common.AreaCard
 
 @OptIn(ExperimentalMaterial3Api::class)

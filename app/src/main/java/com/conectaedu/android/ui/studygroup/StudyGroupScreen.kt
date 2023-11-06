@@ -1,7 +1,8 @@
 package com.conectaedu.android.ui.studygroup
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,49 +65,55 @@ fun StudyGroupScreen(
         },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Text(text = uiState.studyGroup.description, fontSize = 16.sp)
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            LazyColumn(
-                contentPadding = PaddingValues(10.dp),
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)) {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
+                    .fillMaxSize()
+                    .padding(10.dp)
             ) {
-                items(
-                    items = uiState.messages,
-                    key = { it.id },
-                    contentType = { "message" }
-                ) { message ->
-                    if (message.id == uiState.currentUser.id) {
-                        SentMessageCard(message = message)
-                    } else {
-                        ReceivedMessageCard(message = message)
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Text(text = uiState.studyGroup.description, fontSize = 16.sp)
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    items(
+                        items = uiState.messages,
+                        key = { it.id },
+                        contentType = { "message" }
+                    ) { message ->
+                        if (message.senderId == uiState.currentUser.id) {
+                            SentMessageCard(message = message)
+                        } else {
+                            ReceivedMessageCard(message = message)
+                        }
                     }
                 }
-            }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TextField(
-                    value = uiState.message,
-                    onValueChange = { viewModel.onMessageTextChanged(it) },
-                    label = { Text(text = stringResource(id = R.string.study_group_message)) },
-                    modifier = Modifier.weight(1f)
-                )
+                Spacer(modifier = Modifier.height(10.dp))
 
-                IconButton(onClick = { viewModel.onAddMessage() }) {
-                    Icon(imageVector = Icons.Default.Send, contentDescription = null)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextField(
+                        value = uiState.message,
+                        onValueChange = { viewModel.onMessageTextChanged(it) },
+                        label = { Text(text = stringResource(id = R.string.study_group_message)) },
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Button(onClick = { viewModel.onAddMessage() }) {
+                        Icon(imageVector = Icons.Default.Send, contentDescription = null)
+                    }
                 }
             }
         }

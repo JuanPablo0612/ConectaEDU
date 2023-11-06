@@ -3,10 +3,8 @@ package com.conectaedu.android.ui.studygroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +20,6 @@ fun ReceivedMessageCard(message: Message) {
             Text(text = message.text, fontSize = 16.sp, modifier = Modifier.padding(20.dp))
         }
 
-        Spacer(modifier = Modifier.fillMaxHeight(0.4f))
+        Spacer(modifier = Modifier.fillMaxWidth(0.1f))
     }
 }

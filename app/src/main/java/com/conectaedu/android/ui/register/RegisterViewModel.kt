@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.conectaedu.android.data.model.isSuccess
 import com.conectaedu.android.domain.usecase.auth.RegisterUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -78,7 +77,7 @@ class RegisterViewModel @Inject constructor(private val registerUseCase: Registe
         viewModelScope.launch {
             uiState = uiState.copy(isLoading = true)
 
-            val registerResult = registerUseCase(
+            registerUseCase(
                 email = uiState.email.trim(),
                 password = uiState.password.trim(),
                 firstName = uiState.firstName.trim(),
@@ -87,7 +86,7 @@ class RegisterViewModel @Inject constructor(private val registerUseCase: Registe
 
             uiState = uiState.copy(
                 isLoading = false,
-                isSuccess = registerResult.isSuccess(),
+                isSuccess = true,
                 errorMessageId = null
             )
         }
